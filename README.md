@@ -2,6 +2,12 @@
 
 A small package with code helpful for profiling the aiida code and database. In particular, the functions are written for easy use in Jupyter Notebooks.
 
+## Install
+
+```console
+$ pip install -e "git+https://github.com/chrisjsewell/aiida-profiling.git#egg=aiida-profiling"
+```
+
 ## Example
 
 ```python
