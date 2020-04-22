@@ -311,11 +311,17 @@ class ProfileAnalyzer:
             g = break_cycles(g, copy=False)
         return g
 
-    def guess_longest_path(self, root=None, edge_length="totaltime", ignore_path="~"):
+    def guess_longest_path(
+        self, root=None, edge_length="totaltime", ignore_path="~", skip_nodes=()
+    ):
         return guess_longest_path(
-            self, root=root, edge_length=edge_length, ignore_path=ignore_path
+            self,
+            root=root,
+            edge_length=edge_length,
+            ignore_path=ignore_path,
+            skip_nodes=skip_nodes,
         )
-    
+
     def shortest_path(self, node, root=None, edge_length="totaltime"):
         root = root or self.get_root()
         return self.df.loc[nx.shortest_path(self.graph, root, node, weight=edge_length)]
@@ -337,19 +343,25 @@ def code_str(d):
     return f'{d["path"]}:{d["lineno"]}({d["method"]})'
 
 
-def guess_longest_path(p, root=None, edge_length="totaltime", ignore_path="~"):
+def guess_longest_path(
+    p, root=None, edge_length="totaltime", ignore_path="~", skip_nodes=()
+):
     """Find the longest call chain, based on largest call times of children.
     
     By default we ignore built in paths (denoted ~)
     """
     node_chain = [root or p.get_root()]
+    skip_nodes = set(skip_nodes)
     edge_chain = []
     while p.graph.adj[node_chain[-1]]:
         nodes = [
             (n, d)
             for n, d in p.graph.adj[node_chain[-1]].items()
-            if ignore_path is None
-            or not re.match(ignore_path, p.graph.nodes[n]["path"])
+            if (
+                ignore_path is None
+                or not re.match(ignore_path, p.graph.nodes[n]["path"])
+            )
+            and (n not in skip_nodes)
         ]
         if not nodes:
             break
